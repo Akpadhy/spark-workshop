@@ -6,6 +6,22 @@ help() {
   echo "Use ui for the web-based UI. Use shell/sbt for the command line."
 }
 
+filter_garbage() {
+  while read line
+  do
+    if [[ ${line} =~ Please.point.your.browser.at ]] ; then
+      echo
+      echo "=================================================================="
+      echo
+      echo "    Open your web browser to:   http://$ip:9999"
+      echo
+      echo "=================================================================="
+    elif [[ ${line} =~ play.-.Application.started ]] ; then
+      echo $line
+    fi
+  done
+}
+
 case $1 in
   ui|shell) mode=$1    ;;
   sbt)      mode=shell; echo "Using shell mode" ;;
@@ -31,17 +47,19 @@ then
   echo "=================================================================="
   echo
   echo "    Starting the Spark Workshop in Activator using $umode mode..."
-  echo "    Open your web browser to:"
-  echo
-  echo "        http://$ip:9999"
-  echo
-  echo "    (Ignore the message that will say 'http://0.0.0.0:9999')"
   echo
   echo "=================================================================="
+  echo
 
   sleep 2
 fi
 
 # Invoke with NOOP=x start.sh to suppress execution:
 echo $HOME/activator/activator -Dhttp.address=0.0.0.0 -Dhttp.port=9999 $mode
-[[ -z $NOOP ]] && $HOME/activator/activator -Dhttp.address=0.0.0.0 -Dhttp.port=9999 $mode
+[[ -z $NOOP ]] || exit 0
+if [[ $mode = ui ]]
+then
+  $HOME/activator/activator -Dhttp.address=0.0.0.0 -Dhttp.port=9999 $mode 2>&1 | tee "$dir/activator.log" | filter_garbage
+else
+  $HOME/activator/activator -Dhttp.address=0.0.0.0 -Dhttp.port=9999 $mode
+fi
