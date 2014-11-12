@@ -3,20 +3,20 @@
 # hadoop.sh - Wraps calls to spark-submit for submitting Spark jobs.
 #====================================================================
 
+export HADOOP_CONF_DIR=/usr/hdp/current/hadoop-yarn-client/etc/hadoop
+
 help() {
   cat <<EOF
-  usage: $0 --class main -o | --out output_path [--master master] [app_options]
+  usage: $0 --class main -o | --out output_path [app_options]
   where:
     --class main       Specifies the "main" routine to run in the app jar.
     --out output_path  Specifies the output location.
                        Although all the apps have defaults for this path,
                        this script needs to know it!
-    --master master    Defaults to "yarn-client"
     app_options        Any other options to pass to the app.
 EOF
 }
 
-master="yarn-client"
 main=""
 while [ $# -gt 0 ]
 do
@@ -24,10 +24,6 @@ do
     -h|--help)
       help
       exit 0
-      ;;
-    --master)
-      shift
-      master=$1
       ;;
     --class)
       shift
@@ -65,16 +61,14 @@ hadoop fs -rm -r -f $output
 
 project_jar=$(find $HOME/spark-workshop/target/scala-2.* -name 'activator-spark_*.jar' | grep -v 'tests.jar')
 
-echo running: $HOME/spark/bin/spark-submit --master $master --class $main \
-  $project_jar --master $master --out $output $@
+echo running: $HOME/spark/bin/spark-submit --class $main $project_jar --out $output $@
 echo ""
 
 # use NOOP=x scripts/hadoop.sh ... to suppress execution. You'll just see the
 # previous echo output.
 if [[ -z $NOOP ]]
 then
-  $HOME/spark/bin/spark-submit --master $master --class $main \
-  $project_jar --master $master --out $output $@
+  $HOME/spark/bin/spark-submit --class $main $project_jar --out $output $@
 fi
 
 echo ""

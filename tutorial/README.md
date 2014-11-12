@@ -677,6 +677,30 @@ As before, there is also a `ex5a` short cut for `run-main Crawl5a` and you can r
 
 This version of the program doesn't work correctly with HDFS, in part because it uses Java I/O to work a POSIX-compatible file system and HDFS isn't a POSIX file system. So, there's a second version called `Crawl5aHDFS` that uses a different Spark API call to ingest the files. Unfortunately, this call doesn't work with local file systems, so we need two programs. `Crawl5aHDFS` supports the same options that `Crawl5a` supports.
 
+Also, to use this version, you have to stage the HAM and SPAM files, which this example uses, differently in HDFS. We've already done this for you, but keep this in mind should you delete and recreate the `data` directory in HDFS.
+
+If you used the following command to put all the files into HDFS:
+
+```
+hadoop fs -put $SPARK_WORKSHOP/data data
+```
+
+where `$SPARK_WORKSHOP` is the root of this project, then you'll need to rearrange
+the Enron emails, as follows:
+
+```
+hadoop fs -mv data/enron-spam-ham/ham100/* data/enron-spam-ham
+hadoop fs -mv data/enron-spam-ham/spam100/* data/enron-spam-ham
+hadoop fs -rm -r -f data/enron-spam-ham/spam100
+hadoop fs -rm -r -f data/enron-spam-ham/ham100
+```
+
+Finanlly, run this sanity check; there should be 200 files and no directories:
+
+```
+hadoop fs -ls data/enron-spam-ham
+```
+
 So, for Hadoop, select and run [hadoop.HCrawl5aHDFS](#code/src/main/scala/sparkworkshop/hadoop.HCrawl5aHDFS.scala) in the UI, use `run-main hadoop.HCrawl5aHDFS` or `hex5a` in the Activator shell. There is also a bash script [scripts/crawlhdfs5a.sh](#code/scripts/crawlhdfs5a.sh).
 
 Most of the code is straightforward. The comments explain the details.
