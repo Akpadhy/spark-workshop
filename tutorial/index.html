@@ -92,6 +92,30 @@
 
 <p>Assuming you're using the web console, you'll see messages telling you to open your browser to a particular IP address and port 9999. That is, navigate to <code>http://ip-address:9999</code>, where <code>ip-address</code> is the IP address for the VM that's printed by <code>start.sh</code>.</p>
 
+</div><div><h2>Warnings and Errors</h2>
+
+<p>Before we tell you how to build and run the examples, note that there are many warnings and even a few error messages you'll see in the output. Most are harmless, like the following examples:</p>
+
+<pre><code class="(null)">01/02/14 13:22:33 ERROR AbstractNioSelector: Interrupted while wait for resources to be released #2
+...
+01/02/14 13:23:37 WARN LoadSnappy: Snappy native library is available
+01/02/14 13:23:37 WARN NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+01/02/14 13:23:37 WARN LoadSnappy: Snappy native library not loaded</code></pre>
+
+<p>The first <code>ERROR</code> is due to the constrained way we are running Spark. The warnings about &quot;native&quot; libraries are common when running with any Hadoop I/O libraries in a cluster that isn't configured to use the native C libraries for components like compression libraries.</p>
+
+<p>When you run the Hadoop examples, you'll see even more logging output.</p>
+
+<p>The only real error you can't ignore is an out of memory error, which might occur when you run all the examples in one session. By default, <em>Activator</em> is configured to use 4GB by default and we recommend that you allocate 10GB to your virtual machine in VMWare or VirtualBox. If you can't allocate that much memory or you have allocated even more memory, then start with the <code>--mem N</code> flag where N is the number of MB to use. For example, to use 6GB:</p>
+
+<pre><code class="(null)">spark-workshop/start.sh --mem 6144</code></pre>
+
+<p>or</p>
+
+<pre><code class="(null)">spark-workshop/start.sh --mem 6144 shell</code></pre>
+
+<p>In any case, if you run out of memory, exit Activator, restart it with the <code>start.sh</code> script, and continue where you left off.</p>
+
 </div><div><h2>Building and Testing</h2>
 
 <p>To ensure that the basic environment is working, compile the code and run the tests; use the Activator UI's <a class="shortcut" href="#test">test</a> link (or, if you're using the shell commands, run the <code>test</code> task). All dependencies are downloaded, the code is compiled, and the tests are executed. This will take a few minutes the first time and the tests should pass without error. (We've noticed that sometimes a timeout of some kind prevents the tests from completing successfully, but running the tests again works.)</p>
